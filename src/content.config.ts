@@ -1,8 +1,14 @@
 import { z, defineCollection } from "astro:content";
 import { glob } from 'astro/loaders';
 import { createDirectoryCollection } from "@lib/loaders";
+import { directorySchema } from "@validation/directory";
 
 const directory = createDirectoryCollection();
+
+const directoryZh = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/data/directory-zh" }),
+  schema: ({ image }) => directorySchema(image())
+});
 
 const pages = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: "./src/data/pages" }),
@@ -24,6 +30,7 @@ const blog = defineCollection({
 
 export const collections = {
   directory,
+  directoryZh,
   pages,
   blog,
 };

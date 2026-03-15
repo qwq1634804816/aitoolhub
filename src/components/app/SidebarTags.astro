@@ -1,7 +1,15 @@
 ---
-import themeConfig from "@util/themeConfig";
-const tags = themeConfig.directoryData.tags;
-const emoji = themeConfig.layout.emoji;
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
+import { getLangFromUrl, useTranslations, getLocalizedTags } from "@util/i18n";
+
+const lang = getLangFromUrl(new URL(Astro.request.url));
+const localizedConfig = getLocalizedThemeConfig(lang);
+const tags = localizedConfig.directoryData.tags;
+const emoji = localizedConfig.layout.emoji;
+const t = useTranslations(lang);
+
+// Get localized tags
+const localizedTags = getLocalizedTags(lang, tags);
 ---
 
 <div
@@ -9,19 +17,19 @@ const emoji = themeConfig.layout.emoji;
 >
   <a
     class="flex mt-2 text-sm font-medium text-gray-700 dark:text-gray-300 items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-    href="/"
+    href={lang === "en" ? "/" : "/zh"}
   >
     <span
       class="border border-gray-200 dark:border-gray-600 rounded h-7 w-7 inline-flex items-center justify-center"
       >{emoji && "🏠"}</span
     >
-    <span>Home</span>
+    <span>{t('navigation.Home')}</span>
   </a>
   {
-    tags.map((tag) => (
+    localizedTags.map((tag) => (
       <a
         class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
-        href={`/tags/${tag.key}`}
+        href={`${lang === "en" ? "/tags/" : "/zh/tags/"}${tag.key}`}
       >
         <span class="border border-gray-200 dark:border-gray-600 rounded h-7 w-7 inline-flex items-center justify-center">
           {tag.emoji && tag.emoji}

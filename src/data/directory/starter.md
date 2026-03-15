@@ -2,7 +2,7 @@
 title: Cafe Condesa
 description: This is an example listing to get you started.
 tags:
-  - visual
+  - breathing
 link: https://test.com
 ---
 

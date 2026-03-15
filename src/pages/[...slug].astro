@@ -6,18 +6,65 @@ import { render } from "astro:content";
 import Sidebar from "@layouts/Sidebar.astro";
 import Landing from "@layouts/Landing.astro";
 import { getRootPages } from "@lib/getRootPages";
+import config from "@util/themeConfig";
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
+import DirectoryCard from "@components/directory/cards/index.astro";
+import { useTranslations } from "@util/i18n";
 
 // Fetch all listings and pages
 const { slug } = Astro.params;
-const { entry } = Astro.props;
+const { entry, lang = "en", tag } = Astro.props;
+const t = useTranslations(lang);
+const localizedConfig = getLocalizedThemeConfig(lang);
 
-const { Content } = await render(entry);
+let Content;
+let frontmatter;
+let tagListings = [];
+
+if (entry) {
+  // For regular pages and listings
+  const rendered = await render(entry);
+  Content = rendered.Content;
+  frontmatter = entry.data;
+} else if (tag) {
+    // For tag pages
+    // Create a virtual entry for tag pages
+    // Get tag from localized config to get the updated name
+    const localizedTag = localizedConfig.directoryData.tags.find((t: any) => t.key === tag.key);
+    const localizedTagName = localizedTag?.name || tag.name || t(`tags.${tag.key}`);
+    
+    // Get tag description from localized config
+    let localizedTagDescription = `Apps related to ${localizedTagName}`;
+    if (localizedTag && localizedTag.description) {
+      localizedTagDescription = localizedTag.description;
+    }
+    
+    frontmatter = {
+      title: `${localizedTagName} Apps`,
+      description: localizedTagDescription,
+      featured: false,
+      tags: [tag.key],
+      image: null,
+    };
+  // For tag pages, we'll render the content differently
+  Content = () => null;
+  
+  // Get listings for this tag
+  const collection = lang === "zh" ? "directoryZh" : "directory";
+  const allListings = await getCollection(collection);
+  tagListings = allListings.filter(listing => 
+    listing.data.tags && listing.data.tags.includes(tag.key)
+  );
+}
 
 export async function getStaticPaths() {
   return await getRootPages();
 }
 
-const landingView = !slug || slug === "blog";
+const landingView = !slug || slug === "blog" || slug === "zh/blog" || slug === "zh";
+const isTagPage = slug && (slug.startsWith("tags/") || slug.startsWith("zh/tags/"));
+const type = config.directoryUI.grid.type;
+const gridType = type == "rectangle-card-grid" || type == "small-card-grid";
 ---
 
 {
@@ -25,8 +72,25 @@ const landingView = !slug || slug === "blog";
     <Landing>
       <Content />
     </Landing>
+  ) : isTagPage ? (
+    <Sidebar>
+      <div class="not-prose">
+        <h1 class="text-3xl font-bold mb-4">{frontmatter.title}</h1>
+        <p class="text-gray-600 dark:text-gray-300 mb-8">{frontmatter.description}</p>
+        <div
+          class:list={[
+            "grid grid-cols-1 gap-4",
+            { "md:grid-cols-2 lg:grid-cols-4": gridType },
+          ]}
+        >
+          {tagListings.map((listing) => (
+            <DirectoryCard key={listing.id} item={listing} />
+          ))}
+        </div>
+      </div>
+    </Sidebar>
   ) : (
-    <Listing frontmatter={entry.data} slug={slug}>
+    <Listing frontmatter={frontmatter} slug={slug}>
       <Content />
     </Listing>
   )

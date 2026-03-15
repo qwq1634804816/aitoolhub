@@ -1,0 +1,89 @@
+# available directory themes:
+# spearmint, peppermint, hemingway, brookmint
+theme = ''
+
+[general]
+title = "冥想应用配置测试"
+logo = ""
+iconLogo = "tabler:coffee"
+
+[general.seo]
+name = "冥想应用目录"
+description = "发现最好的冥想应用。"
+url = "https://nuxtstarters.com"
+
+[directoryData.source]
+name = "default"    # default, mock, sheets, json
+links = "normal"
+
+[directoryData.tagPages]
+title = "{0} 应用"
+
+[directoryData.search]
+placeholder = "在这个目录的 {0} 个应用中搜索 :)"
+
+[[directoryData.tags]]
+key = "breathing"
+name = "呼吸"
+color = "blue"
+emoji = "👃"
+description = "呼吸技巧是冥想应用中的热门功能，这是从settings-zh.toml文件加载的最新描述！"
+
+[[directoryData.tags]]
+key = "sleep"
+name = "睡眠"
+color = "green"
+emoji = "💤"
+description = "一些应用包含慢慢消失的音乐，帮助您更好地入睡和休息。"
+
+[[directoryData.tags]]
+key = "meditation"
+name = "冥想"
+color = "purple"
+emoji = "🧘‍♂️"
+description = "为您的生活提供冥想。这是放松和清醒头脑的好方法。也是改善睡眠的好方法。"
+
+[[directoryData.tags]]
+key = "yoga"
+name = "瑜伽"
+color = "purple"
+emoji = "🧘‍♂️"
+description = "为您的生活提供瑜伽。"
+
+[[directoryData.tags]]
+key = "timer"
+name = "计时器"
+color = "green"
+emoji = "⏰"
+description = "计时器可用于跟踪您的冥想时间。"
+
+[header.banner]
+show = true
+text = "在Twitter上关注mark_bruderer。"
+link = "https://x.com/intent/follow?screen_name=mark_bruderer"
+brandText = "AI 代理库"
+
+[header.navbar]
+colorModeSelector = true
+
+[[header.navbar.links]]
+name = "Blog"
+href = "/blog"
+
+[[header.navbar.links]]
+name = "Analytics"
+href = "https://us.posthog.com/shared/vHlGCcSqPjGH4r_QijaXSETtmN9J-g"
+target = "_blank"
+
+[header.actionButton]
+text = "提交应用"
+href = "https://tally.so"
+
+[footer]
+description = "我的利基市场的最佳目录。"
+
+[footer.socials.x]
+link = "https://x.com/mark_bruderer"
+
+[footer.socials.youtube]
+link = "https://www.youtube.com/@mark_hacks"

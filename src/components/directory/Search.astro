@@ -5,22 +5,19 @@ import formatString from "../../util/formatString";
 import UiTagGrid from "../ui/tags/Grid.vue";
 import UiTagSelect from "../ui/tags/Select.vue";
 import config from "@util/themeConfig";
+import { getLocalizedThemeConfig } from "../../util/localizedThemeConfig";
+import { getLangFromUrl } from "../../util/i18n";
 
+const locale = getLangFromUrl(Astro.url);
+const localizedConfig = getLocalizedThemeConfig(locale);
 const searchPlaceholder = await getSearchPlaceholder();
 
 async function getSearchPlaceholder() {
-  if (
-    config.directoryData.search?.placeholder &&
-    config.directoryData.search.placeholder.includes("{0}")
-  ) {
-    const count = (await getCollection("directory")).length;
-    return formatString(
-      config.directoryData.search?.placeholder ?? "Search among {0} listings",
-      count,
-    );
-  }
-
-  return config.directoryData.search?.placeholder ?? "Search";
+  const collectionName = locale === "en" ? "directory" : `directory${locale.charAt(0).toUpperCase() + locale.slice(1)}`;
+  const count = (await getCollection(collectionName)).length;
+  
+  const placeholder = localizedConfig.directoryData.search.placeholder || "Search among {0} listings";
+  return formatString(placeholder, count);
 }
 ---
 

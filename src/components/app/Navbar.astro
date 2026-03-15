@@ -2,7 +2,16 @@
 import { Icon } from "astro-icon/components";
 import ColorSelector from "./header/ColorSelector.astro";
 import Logo from "./Logo.astro";
+import LanguageSelector from "./ui/LanguageSelector.astro";
 import config from "@util/themeConfig";
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
+import { getLangFromUrl, useTranslations, getLocalizedNavigation } from "@util/i18n";
+
+// Get the current path safely
+const currentPath = new URL(Astro.request.url).pathname;
+const lang = getLangFromUrl(new URL(Astro.request.url));
+const localizedConfig = getLocalizedThemeConfig(lang);
+const t = useTranslations(lang);
 
 // Helper function to check if a route is active
 const isActive = (path: string, currentPath: string | undefined) => {
@@ -12,8 +21,8 @@ const isActive = (path: string, currentPath: string | undefined) => {
   );
 };
 
-// Get the current path safely
-const currentPath = new URL(Astro.request.url).pathname;
+// Get localized navigation links
+const localizedLinks = getLocalizedNavigation(lang, localizedConfig.header.navbar.links || []);
 ---
 
 <nav
@@ -47,7 +56,7 @@ const currentPath = new URL(Astro.request.url).pathname;
         </div>
         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
           {
-            config.header.navbar.links.map((navItem) =>
+            localizedLinks.map((navItem) =>
               navItem.target !== "_blank" ? (
                 <a
                   href={navItem.href}
@@ -76,54 +85,50 @@ const currentPath = new URL(Astro.request.url).pathname;
 
       <!-- Action button and color selector -->
       <div
-        class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
+        class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0 z-50"
       >
-        <div
-          class="flex gap-2 items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse"
+        {
+          config.header.navbar.colorModeSelector && (
+            <ColorSelector transition:persist class="hidden md:flex" />
+          )
+        }
+        <a
+          href={localizedConfig?.header.actionButton?.href}
+          class="hidden md:block text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 ml-3"
         >
-          {
-            config.header.navbar.colorModeSelector && (
-              <ColorSelector transition:persist class="hidden md:flex" />
-            )
-          }
-          <a
-            href={config?.header.actionButton?.href}
-            class="hidden md:block text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-          >
-            {config?.header.actionButton?.text}
-          </a>
-        </div>
+          {t(`navigation.${localizedConfig?.header.actionButton?.text}`)}
+        </a>
       </div>
     </div>
   </div>
 
   <!-- Mobile menu -->
   <div id="mobile-menu" class="sm:hidden hidden">
-    <div class="space-y-1 pb-4 pt-2">
-      {
-        config.header.navbar.links.map((item) => (
-          <a
-            href={item.href}
-            class={`block border-l-4 py-2 pl-3 pr-4 text-base font-medium ${
-              isActive(item.href, currentPath)
-                ? "bg-primary-50 border-primary-500 text-primary-700"
-                : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-            }`}
-          >
-            {item.name}
-            {item.target === "_blank" && <Icon name="tabler:external-link" />}
-          </a>
-        ))
-      }
-    </div>
+      <div class="space-y-1 pb-4 pt-2">
+        {
+          localizedLinks.map((item) => (
+            <a
+              href={item.href}
+              class={`block border-l-4 py-2 pl-3 pr-4 text-base font-medium ${
+                isActive(item.href, currentPath)
+                  ? "bg-primary-50 border-primary-500 text-primary-700"
+                  : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+              }`}
+            >
+              {item.name}
+              {item.target === "_blank" && <Icon name="tabler:external-link" />}
+            </a>
+          ))
+        }
+      </div>
 
     <div class="border-t border-gray-200 pb-3 pt-4">
       <div class="flex items-center px-4">
         <a
-          href={config?.header.actionButton?.href}
+          href={localizedConfig?.header.actionButton?.href}
           class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
         >
-          {config?.header.actionButton?.text}
+          {t(`navigation.${localizedConfig?.header.actionButton?.text}`)}
         </a>
       </div>
     </div>

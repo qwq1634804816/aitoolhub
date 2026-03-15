@@ -2,11 +2,17 @@
 import AppLogo from "./Logo.astro";
 import { Icon } from "astro-icon/components";
 import config from "@util/themeConfig";
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
+import { getLangFromUrl, useTranslations, getLocalizedFooterNavigation } from "@util/i18n";
 
-const socials = Object.values(config.footer.socials);
-const socialNames = Object.keys(config.footer.socials);
+const lang = getLangFromUrl(new URL(Astro.request.url));
+const localizedConfig = getLocalizedThemeConfig(lang);
+const socials = Object.values(localizedConfig.footer.socials);
+const socialNames = Object.keys(localizedConfig.footer.socials);
+const t = useTranslations(lang);
 
-const navigation = [
+// Get base navigation
+const baseNavigation = [
   {
     title: "Directory",
     links: [
@@ -16,7 +22,7 @@ const navigation = [
   },
   {
     title: "Categories",
-    links: config.directoryData.tags
+    links: localizedConfig.directoryData.tags
       ?.filter((e) => e && e.name)
       .map((e) => ({
         title: e.name,
@@ -36,6 +42,9 @@ const navigation = [
     ],
   },
 ];
+
+// Get localized navigation
+const navigation = getLocalizedFooterNavigation(lang, baseNavigation);
 ---
 
 <footer
@@ -115,7 +124,7 @@ const navigation = [
     >
       <p class="text-xs leading-5 text-gray-500">
         &copy; {new Date().getFullYear()}
-        {config.general.title} All rights reserved.
+        {localizedConfig.general.title} All rights reserved.
       </p>
     </div>
   </div>

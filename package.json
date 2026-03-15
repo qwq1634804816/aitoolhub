@@ -30,6 +30,7 @@
     "@vercel/og": "^0.6.5",
     "astro": "^5.5.2",
     "astro-color-scheme": "^1.1.5",
+    "astro-i18n": "^2.2.4",
     "astro-sheet-loader": "^1.0.5",
     "dotenv": "^16.4.7",
     "google-auth-library": "^9.15.1",

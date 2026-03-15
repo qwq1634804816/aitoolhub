@@ -1,9 +1,12 @@
 import { settingsSchema, themeSchema, themeSettingsSchema, type SettingsSchema } from "@validation/settings";
-import configData from "../config/settings.toml";
+import defaultConfigData from "../config/settings.toml";
 import peppermint from "../config/themes/peppermint.toml";
 import spearmint from "../config/themes/spearmint.toml";
 import brookmint from "../config/themes/brookmint.toml";
 import hemingway from "../config/themes/hemingway.toml";
+
+// Import language-specific config files
+import zhConfigData from "../config/settings-zh.toml";
 
 function getConfig(data: unknown) {
   try {
@@ -20,19 +23,45 @@ const themes = {
   hemingway: themeSchema.parse(hemingway),
 };
 
-const data = getConfig(configData);
-let settings: SettingsSchema;
+// Load default config
+const defaultData = getConfig(defaultConfigData);
+let defaultSettings: SettingsSchema;
 
-if (data) {
-  const selectedTheme = configData.theme || "peppermint";
+if (defaultData) {
+  const selectedTheme = defaultConfigData.theme || "peppermint";
   const themeConfig = themes[selectedTheme as keyof typeof themes];
   
-  settings = {
+  defaultSettings = {
     ...themeConfig,
-    ...data,
+    ...defaultData,
   };
 } else {
-  settings = settingsSchema.parse(configData);
+  defaultSettings = settingsSchema.parse(defaultConfigData);
 }
 
-export default settings;
+// Load Chinese config
+let zhSettings: SettingsSchema;
+const zhData = getConfig(zhConfigData);
+if (zhData) {
+  const selectedTheme = zhConfigData.theme || defaultConfigData.theme || "peppermint";
+  const themeConfig = themes[selectedTheme as keyof typeof themes];
+  
+  zhSettings = {
+    ...themeConfig,
+    ...zhData,
+  };
+} else {
+  zhSettings = settingsSchema.parse(zhConfigData);
+}
+
+// Export default settings
+export default defaultSettings;
+
+// Export function to get settings by language
+export function getSettingsByLang(lang: string): SettingsSchema {
+  if (lang === "zh") {
+    return zhSettings;
+  }
+  
+  return defaultSettings;
+}

@@ -2,7 +2,14 @@
 import { Icon } from "astro-icon/components";
 import ColorSelector from "./header/ColorSelector.astro";
 import Logo from "./Logo.astro";
+import LanguageSelector from "./ui/LanguageSelector.astro";
 import config from "@util/themeConfig";
+import { getLangFromUrl, useTranslations, getLocalizedNavigation } from "@util/i18n";
+
+// Get the current path safely
+const currentPath = new URL(Astro.request.url).pathname;
+const lang = getLangFromUrl(new URL(Astro.request.url));
+const t = useTranslations(lang);
 
 // Helper function to check if a route is active
 const isActive = (path: string, currentPath: string | undefined) => {
@@ -10,8 +17,8 @@ const isActive = (path: string, currentPath: string | undefined) => {
   return currentPath.split('/')[1] === path.split('/')[1] || currentPath === path;
 };
 
-// Get the current path safely
-const currentPath = new URL(Astro.request.url).pathname;
+// Get localized navigation links
+const localizedLinks = getLocalizedNavigation(lang, config.header.navbar.links || []);
 ---
 
 <nav
@@ -30,7 +37,7 @@ const currentPath = new URL(Astro.request.url).pathname;
           class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 dark:border-gray-700"
         >
           {
-            config.header.navbar.links.map((nav) => (
+            localizedLinks.map((nav) => (
               <li>
                 <a
                   href={nav.href}
@@ -55,7 +62,7 @@ const currentPath = new URL(Astro.request.url).pathname;
         href={config.header.actionButton.href}
         class="hidden md:inline-flex items-center dark:text-gray-300 text-gray-600"
       >
-        {config.header.actionButton.text}
+        {t(`navigation.${config.header.actionButton.text}`)}
       </a>
       }
       <ColorSelector transition:persist class="hidden md:flex" />
@@ -85,7 +92,7 @@ const currentPath = new URL(Astro.request.url).pathname;
       <div id="mobile-menu" class="sm:hidden hidden">
         <div class="space-y-1 pb-4 pt-2">
           {
-            config.header.navbar.links.map((item) => (
+            localizedLinks.map((item) => (
               <a
                 href={item.href}
                 class={`block border-l-4 py-2 pl-3 pr-4 text-base font-medium ${

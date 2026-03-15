@@ -3,6 +3,7 @@ import config from "@util/themeConfig";
 import BulletCard from "./BulletCard.astro";
 import RectangleCard from "./RectangleCard.astro";
 import SmallHorizontalCard from "./SmallHorizontalCard.astro";
+import { getLangFromUrl } from "@util/i18n";
 
 const { item } = Astro.props;
 
@@ -11,9 +12,11 @@ const myItem = {
   ...item.data,
 };
 
+const lang = getLangFromUrl(new URL(Astro.request.url));
+const basePath = lang === "en" ? "" : `/${lang}`;
 const href = config.directoryData?.source?.linksOutbound
   ? myItem.link
-  : `/${myItem.id}`;
+  : `${basePath}/${myItem.id}`;
 
 const type = config.directoryUI.grid.type;
 ---
