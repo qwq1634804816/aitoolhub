@@ -23,8 +23,8 @@ const baseNavigation = [
   {
     title: "Categories",
     links: localizedConfig.directoryData.tags
-      ?.filter((e) => e && e.name)
-      .map((e) => ({
+      ?.filter((e: any) => e && e.name)
+      .map((e: any) => ({
         title: e.name,
         link: `/tags/${e.key}`,
       }))
@@ -59,7 +59,7 @@ const navigation = getLocalizedFooterNavigation(lang, baseNavigation);
         <div class="flex space-x-6">
           {
             socials.map((item, index) => (
-              <a href={item?.link} class="text-gray-400 hover:text-gray-500">
+              <a href={(item as any)?.link} class="text-gray-400 hover:text-gray-500">
                 <span class="sr-only">{item}</span>
                 <Icon
                   name={

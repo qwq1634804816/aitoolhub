@@ -14,7 +14,6 @@ const locales = [
     <div class="flex space-x-1">
       {locales.map((locale) => (
         <a
-          key={locale.code}
           href={switchLang(new URL(Astro.request.url), locale.code)}
           class={`px-3 py-1 text-sm rounded-md ${currentLocale === locale.code ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
         >

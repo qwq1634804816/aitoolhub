@@ -22,6 +22,11 @@ title = "{0} Apps"
 [directoryData.search]
 placeholder = "Search among {0} listings of this directory :)"
 
+[directoryData.search.tags]
+display = "show-all" # options: none,select,show-all
+intersection = false
+placeholder = "Select a tag"
+
 [[directoryData.tags]]
 key = "breathing"
 name = "Breathing"

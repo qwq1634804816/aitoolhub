@@ -2,7 +2,7 @@
 import { Icon } from "astro-icon/components";
 import ColorSelector from "./header/ColorSelector.astro";
 import Logo from "./Logo.astro";
-import LanguageSelector from "./ui/LanguageSelector.astro";
+import LanguageSelector from "../ui/LanguageSelector.astro";
 import config from "@util/themeConfig";
 import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
 import { getLangFromUrl, useTranslations, getLocalizedNavigation } from "@util/i18n";
@@ -16,9 +16,31 @@ const t = useTranslations(lang);
 // Helper function to check if a route is active
 const isActive = (path: string, currentPath: string | undefined) => {
   if (!currentPath) return false;
-  return (
-    currentPath.split("/")[1] === path.split("/")[1] || currentPath === path
-  );
+  
+  // If current path is exactly the same as the link path, return true
+  if (currentPath === path) return true;
+  
+  // For paths with language prefix, compare the full path
+  // For root path, only match exactly
+  if (currentPath === "/" || currentPath === "/zh") {
+    return currentPath === path;
+  }
+  
+  // For other paths, compare the path segments after the language prefix
+  const currentPathSegments = currentPath.split("/");
+  const pathSegments = path.split("/");
+  
+  // Skip language prefix if present
+  const currentPathStart = currentPathSegments[1] === "zh" || currentPathSegments[1] === "en" ? 2 : 1;
+  const pathStart = pathSegments[1] === "zh" || pathSegments[1] === "en" ? 2 : 1;
+  
+  // If either path has no segments after the language prefix, they can't match
+  if (currentPathSegments.length <= currentPathStart || pathSegments.length <= pathStart) {
+    return false;
+  }
+  
+  // Compare the first segment after the language prefix
+  return currentPathSegments[currentPathStart] === pathSegments[pathStart];
 };
 
 // Get localized navigation links

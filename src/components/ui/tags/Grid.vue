@@ -2,9 +2,22 @@
 import { useStore } from '@nanostores/vue';
 import { tags } from '@/store.js';
 import config from "@util/themeConfig";
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
 import type Tag from "@/types/Tag";
 
-const availableTags = config.directoryData.tags as Tag[] | undefined;
+// Define props
+const props = defineProps<{
+  locale: string;
+}>();
+
+// Get tags from config (server-side compatible)
+let availableTags = config.directoryData.tags as Tag[] | undefined;
+
+// On client side, use localized tags
+if (typeof window !== 'undefined') {
+  const localizedConfig = getLocalizedThemeConfig(props.locale);
+  availableTags = localizedConfig.directoryData.tags as Tag[] | undefined;
+}
 
 const selectedTags = useStore(tags);
 

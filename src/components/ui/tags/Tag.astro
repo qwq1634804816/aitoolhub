@@ -1,9 +1,12 @@
 ---
 import type Tag from "../../../types/Tag";
-import themeConfig from "@util/themeConfig";
-const config = themeConfig.directoryData.tags;
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
+import { getLangFromUrl } from "@util/i18n";
 
 const { tag } = Astro.props;
+const lang = getLangFromUrl(new URL(Astro.request.url));
+const localizedConfig = getLocalizedThemeConfig(lang);
+const config = localizedConfig.directoryData.tags;
 
 const configTag = config?.find((element: any) => element.key === tag);
 

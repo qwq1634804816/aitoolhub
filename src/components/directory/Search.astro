@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import { getCollection } from "astro:content";
+import { getCollection, type DataEntryMap } from "astro:content";
 import formatString from "../../util/formatString";
 import UiTagGrid from "../ui/tags/Grid.vue";
 import UiTagSelect from "../ui/tags/Select.vue";
@@ -14,7 +14,7 @@ const searchPlaceholder = await getSearchPlaceholder();
 
 async function getSearchPlaceholder() {
   const collectionName = locale === "en" ? "directory" : `directory${locale.charAt(0).toUpperCase() + locale.slice(1)}`;
-  const count = (await getCollection(collectionName)).length;
+  const count = (await getCollection(collectionName as keyof DataEntryMap)).length;
   
   const placeholder = localizedConfig.directoryData.search.placeholder || "Search among {0} listings";
   return formatString(placeholder, count);
@@ -58,13 +58,13 @@ async function getSearchPlaceholder() {
       }
       if (config.directoryUI.search.tags.display === "select") {
         return (
-          <UiTagSelect client:load>
+          <UiTagSelect client:load locale={locale}>
             <Icon name="tabler:x" />
           </UiTagSelect>
         );
       }
       if (config.directoryUI.search.tags.display === "show-all") {
-        return <UiTagGrid client:load />;
+        return <UiTagGrid client:load locale={locale} />;
       }
     }
   }

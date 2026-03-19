@@ -2,9 +2,22 @@
 import { useStore } from '@nanostores/vue';
 import { tags } from '@/store.js';
 import config from "@util/themeConfig";
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
 import type Tag from "@/types/Tag";
 
-const availableTags = config.directoryData.tags as Tag[] | undefined;
+// Define props
+const props = defineProps<{
+  locale: string;
+}>();
+
+// Get tags from config (server-side compatible)
+let availableTags = config.directoryData.tags as Tag[] | undefined;
+
+// On client side, use localized tags
+if (typeof window !== 'undefined') {
+  const localizedConfig = getLocalizedThemeConfig(props.locale);
+  availableTags = localizedConfig.directoryData.tags as Tag[] | undefined;
+}
 
 const selectedTags = useStore(tags);
 
@@ -25,6 +38,29 @@ function addTagWithEvent(event: Event) {
   
   select.value = "";
 }
+
+// Get localized tag name by key
+function getLocalizedTagName(tagKey: string): string {
+  const tag = availableTags?.find(t => t.key === tagKey);
+  return tag?.name || tagKey;
+}
+
+// Get localized select placeholder
+function getSelectPlaceholder(): string {
+  if (typeof window !== 'undefined') {
+    const localizedConfig = getLocalizedThemeConfig(props.locale);
+    // 检查 localizedConfig 是否存在及其结构
+    if (localizedConfig && localizedConfig.directoryData && localizedConfig.directoryData.search) {
+      // 优先使用 localizedConfig 中的 placeholder
+      if (localizedConfig.directoryData.search.tags?.placeholder) {
+        return localizedConfig.directoryData.search.tags.placeholder;
+      }
+    }
+    // 如果没有找到，根据语言返回默认值
+    return props.locale === 'zh' ? "选择一个标签" : "Select a tag";
+  }
+  return "Select a tag";
+}
 </script>
 
 <template>
@@ -36,14 +72,14 @@ function addTagWithEvent(event: Event) {
         class="absolute text-gray-500 opacity-0 transition-all group-hover:opacity-100 hover:bg-gray-100 flex items-center justify-center -top-4 left-0 bg-white rounded-full h-6 w-6 border dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-800">
         <slot />
       </span>
-      {{ myTag }}
+      {{ getLocalizedTagName(myTag) }}
     </div>
     <select @change="addTagWithEvent"
       class="border border-dashed border-gray-300 rounded-lg font-semibold text-gray-500 dark:border-gray-500 dark:bg-gray-700 dark:text-gray-400 focus:ring-primary-500 focus:ring-2 focus:border-none ring-offset-4">
       <option value="" disabled selected>
-        Select a tag
+        {{ getSelectPlaceholder() }}
       </option>
-      <option v-for="tag in availableTags" :key="tag.name" :value="tag.name">{{ tag.name }}</option>
+      <option v-for="tag in availableTags" :key="tag.key" :value="tag.key">{{ tag.name }}</option>
     </select>
   </div>
 </template>

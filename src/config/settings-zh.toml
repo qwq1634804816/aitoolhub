@@ -3,7 +3,7 @@
 theme = ''
 
 [general]
-title = "冥想应用配置测试"
+title = "冥想应用"
 logo = ""
 iconLogo = "tabler:coffee"
 
@@ -21,6 +21,11 @@ title = "{0} 应用"
 
 [directoryData.search]
 placeholder = "在这个目录的 {0} 个应用中搜索 :)"
+
+[directoryData.search.tags]
+display = "show-all" # options: none,select,show-all
+intersection = false
+placeholder = "选择一个标签"
 
 [[directoryData.tags]]
 key = "breathing"

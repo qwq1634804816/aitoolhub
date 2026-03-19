@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, type DataEntryMap } from "astro:content";
 import Wide from "@layouts/Wide.astro";
 import Listing from "@layouts/Listing.astro";
 import { render } from "astro:content";
@@ -10,16 +10,17 @@ import config from "@util/themeConfig";
 import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
 import DirectoryCard from "@components/directory/cards/index.astro";
 import { useTranslations } from "@util/i18n";
+import type { CollectionEntry } from "astro:content";
 
 // Fetch all listings and pages
 const { slug } = Astro.params;
-const { entry, lang = "en", tag } = Astro.props;
+const { entry, lang = "en", tag } = Astro.props as { entry?: any; lang?: string; tag?: any };
 const t = useTranslations(lang);
 const localizedConfig = getLocalizedThemeConfig(lang);
 
-let Content;
-let frontmatter;
-let tagListings = [];
+let Content: any;
+let frontmatter: any;
+let tagListings: any[] = [];
 
 if (entry) {
   // For regular pages and listings
@@ -27,31 +28,31 @@ if (entry) {
   Content = rendered.Content;
   frontmatter = entry.data;
 } else if (tag) {
-    // For tag pages
-    // Create a virtual entry for tag pages
-    // Get tag from localized config to get the updated name
-    const localizedTag = localizedConfig.directoryData.tags.find((t: any) => t.key === tag.key);
-    const localizedTagName = localizedTag?.name || tag.name || t(`tags.${tag.key}`);
-    
-    // Get tag description from localized config
-    let localizedTagDescription = `Apps related to ${localizedTagName}`;
-    if (localizedTag && localizedTag.description) {
-      localizedTagDescription = localizedTag.description;
-    }
-    
-    frontmatter = {
-      title: `${localizedTagName} Apps`,
-      description: localizedTagDescription,
-      featured: false,
-      tags: [tag.key],
-      image: null,
-    };
+  // For tag pages
+  // Create a virtual entry for tag pages
+  // Get tag from localized config to get the updated name
+  const localizedTag = localizedConfig.directoryData.tags.find((t: any) => t.key === tag.key);
+  const localizedTagName = localizedTag?.name || tag.name || t(`tags.${tag.key}`);
+  
+  // Get tag description from localized config
+  let localizedTagDescription = `Apps related to ${localizedTagName}`;
+  if (localizedTag && localizedTag.description) {
+    localizedTagDescription = localizedTag.description;
+  }
+  
+  frontmatter = {
+    title: `${localizedTagName} Apps`,
+    description: localizedTagDescription,
+    featured: false,
+    tags: [tag.key],
+    image: null,
+  };
   // For tag pages, we'll render the content differently
   Content = () => null;
   
   // Get listings for this tag
   const collection = lang === "zh" ? "directoryZh" : "directory";
-  const allListings = await getCollection(collection);
+  const allListings = await getCollection(collection as keyof DataEntryMap);
   tagListings = allListings.filter(listing => 
     listing.data.tags && listing.data.tags.includes(tag.key)
   );
@@ -70,13 +71,13 @@ const gridType = type == "rectangle-card-grid" || type == "small-card-grid";
 {
   landingView ? (
     <Landing>
-      <Content />
+      {Content && <Content />}
     </Landing>
   ) : isTagPage ? (
     <Sidebar>
       <div class="not-prose">
-        <h1 class="text-3xl font-bold mb-4">{frontmatter.title}</h1>
-        <p class="text-gray-600 dark:text-gray-300 mb-8">{frontmatter.description}</p>
+        <h1 class="text-3xl font-bold mb-4">{frontmatter?.title || "Tag Page"}</h1>
+        <p class="text-gray-600 dark:text-gray-300 mb-8">{frontmatter?.description || ""}</p>
         <div
           class:list={[
             "grid grid-cols-1 gap-4",
@@ -91,7 +92,7 @@ const gridType = type == "rectangle-card-grid" || type == "small-card-grid";
     </Sidebar>
   ) : (
     <Listing frontmatter={frontmatter} slug={slug}>
-      <Content />
+      {Content && <Content />}
     </Listing>
   )
 }

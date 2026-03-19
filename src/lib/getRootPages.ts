@@ -16,7 +16,7 @@ export async function getRootPages(remapIndex: boolean = true) {
   const combinedEntries: Array<AllContent> = allListings.concat(allPages as never);
   
   // Generate paths for default language (English)
-  const defaultPaths = combinedEntries.map((entry) => {
+  const defaultPaths: any[] = combinedEntries.map((entry) => {
     let mySlug: string = entry.id;
 
     if (mySlug === "index" && remapIndex) {
@@ -39,7 +39,7 @@ export async function getRootPages(remapIndex: boolean = true) {
   });
   
   // Generate paths for Chinese language
-  const zhPaths = [];
+  const zhPaths: any[] = [];
   
   // Add Chinese home page
   const zhIndexPage = allPages.find(entry => entry.id === "index-zh");
