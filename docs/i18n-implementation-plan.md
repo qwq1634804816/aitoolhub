@@ -645,7 +645,191 @@ export function getLocalizedFooterNavigation(lang: string, navigation: Array<{ t
 - 修复了 `getRootPages.ts` 中的类型错误，将返回类型定义为 `any[]`
 - 从 `astro:content` 导入 `DataEntryMap` 类型，解决未定义错误
 
-### 3.7 内容配置更新
+### 3.7 自动语言检测功能
+
+为了提升用户体验，我们实现了自动语言检测功能。该功能会根据用户的浏览器设置和地区自动切换语言，同时尊重用户的手动选择。
+
+#### 3.7.1 实现逻辑
+
+自动语言检测脚本（`public/scripts/autoLangDetection.js`）实现了以下逻辑：
+
+1. **检查本地存储**：优先使用用户手动选择的语言（12 小时内有效）
+2. **首次访问检测**：如果没有本地存储，根据浏览器语言和时区自动检测
+3. **智能切换**：用户手动切换语言后，立即更新本地存储，避免循环重定向
+
+#### 3.7.2 核心代码
+
+**`public/scripts/autoLangDetection.js`**
+
+```javascript
+// 自动语言检测脚本
+
+// 检查是否在中国地区
+function isChinaRegion() {
+  // 方法 1: 检查浏览器语言设置
+  const navigatorLanguage = navigator.language || navigator.userLanguage;
+  const isChineseLanguage = navigatorLanguage.startsWith('zh');
+  
+  // 方法 2: 检查时区（中国使用 UTC+8）
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const isChinaTimeZone = timeZone === 'Asia/Shanghai' || timeZone === 'Asia/Beijing' || timeZone === 'Asia/Chongqing' || timeZone === 'Asia/Hong_Kong' || timeZone === 'Asia/Macau' || timeZone === 'Asia/Taipei';
+  
+  // 方法 3: 检查浏览器区域设置
+  const navigatorLocale = navigator.language || navigator.userLanguage;
+  const isChineseLocale = navigatorLocale.startsWith('zh');
+  
+  // 只要满足任一条件，就认为在中国地区
+  const result = isChineseLanguage || isChinaTimeZone || isChineseLocale;
+  return result;
+}
+
+// 从本地存储获取用户语言选择
+function getUserLanguagePreference() {
+  try {
+    const storedData = localStorage.getItem('language_preference');
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      const now = Date.now();
+      // 检查是否在 12 小时内
+      const isWithin12Hours = now - parsedData.timestamp < 12 * 60 * 60 * 1000;
+      if (isWithin12Hours) {
+        return parsedData.language;
+      } else {
+        // 如果超过 12 小时，清除存储
+        localStorage.removeItem('language_preference');
+      }
+    }
+  } catch (error) {
+    console.error('Error reading language preference from localStorage:', error);
+  }
+  return null;
+}
+
+// 重定向到相应的语言版本
+function redirectToLanguage() {
+  // 检测 URL 中的语言
+  const pathname = window.location.pathname;
+  let detectedLang = 'en'; // 默认英文
+  if (pathname.startsWith('/zh')) {
+    detectedLang = 'zh';
+  }
+  
+  // 检查本地存储中的语言选择
+  const storedLanguage = getUserLanguagePreference();
+  
+  // 如果有存储的语言选择，使用存储的语言
+  if (storedLanguage) {
+    // 如果存储的语言与当前语言不同，说明用户手动切换了语言
+    if (storedLanguage !== detectedLang) {
+      // 更新本地存储为当前 URL 的语言（用户手动切换的）
+      const storageData = {
+        language: detectedLang,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('language_preference', JSON.stringify(storageData));
+      // 不需要重定向，因为 URL 已经是用户想要的语言
+    }
+    return; // 重要：有存储时直接返回，不再执行下面的地区检测
+  }
+  
+  // 没有存储的语言选择，根据地区检测
+  const shouldUseChinese = isChinaRegion();
+  const targetLanguage = shouldUseChinese ? 'zh' : 'en';
+  
+  // 如果检测到的地区语言与当前语言不同，进行重定向
+  if (targetLanguage !== detectedLang) {
+    // 构建新的 URL
+    let newPathname;
+    if (targetLanguage === 'en') {
+      // 英文版本移除语言前缀
+      if (pathname.startsWith('/zh')) {
+        newPathname = pathname.replace(/^\/zh/, '');
+        if (!newPathname.startsWith('/')) {
+          newPathname = `/${newPathname}`;
+        }
+        if (newPathname === '') {
+          newPathname = '/';
+        }
+      } else {
+        newPathname = pathname;
+      }
+    } else {
+      // 中文版本添加 /zh 前缀
+      if (pathname.startsWith('/zh')) {
+        newPathname = pathname;
+      } else {
+        if (pathname === '/') {
+          newPathname = '/zh';
+        } else {
+          newPathname = `/zh${pathname}`;
+        }
+      }
+    }
+    
+    // 确保新路径不是重复的
+    if (newPathname !== window.location.pathname) {
+      const newUrl = new URL(newPathname, window.location.origin);
+      newUrl.search = window.location.search;
+      newUrl.hash = window.location.hash;
+      
+      // 重定向
+      window.location.href = newUrl.href;
+    }
+  }
+  
+  // 保存语言选择（首次访问）
+  const storageData = {
+    language: targetLanguage,
+    timestamp: Date.now()
+  };
+  localStorage.setItem('language_preference', JSON.stringify(storageData));
+}
+
+// 页面加载时执行
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', redirectToLanguage);
+}
+```
+
+#### 3.7.3 工作流程
+
+1. **用户首次访问**：
+   - 检测浏览器语言和时区
+   - 如果在中国地区，重定向到中文版本（`/zh`）
+   - 保存语言选择到本地存储（12 小时有效期）
+
+2. **用户手动切换语言**：
+   - 点击语言切换按钮
+   - URL 变为目标语言路径
+   - 页面加载时检测到 URL 语言与存储不同
+   - 立即更新本地存储为 URL 语言
+   - 不进行重定向（避免循环）
+
+3. **用户刷新页面**：
+   - 检测本地存储中的语言选择
+   - 如果与当前 URL 一致，不做任何操作
+   - 如果不一致，说明用户手动切换了，更新存储
+
+4. **12 小时后**：
+   - 本地存储过期
+   - 重新根据地区检测自动切换语言
+
+#### 3.7.4 关键问题解决
+
+**问题：循环重定向**
+
+早期实现中，脚本在每次页面加载时都会更新本地存储，导致：
+1. 用户切换到英文（URL: `/starter`）
+2. 脚本检测到 URL 是英文，更新存储为英文
+3. 但下次刷新时，脚本又检测到用户在中国，重定向到中文
+4. 形成无限循环
+
+**解决方案**：
+- 有本地存储时，只更新不重定向
+- 没有本地存储时，才根据地区检测重定向
+- 用户手动切换后，立即更新存储，确保下次刷新不会被覆盖
+
+### 3.8 内容配置更新
 
 **`src/content.config.ts`**
 

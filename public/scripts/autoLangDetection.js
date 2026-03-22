@@ -31,13 +31,13 @@ function getUserLanguagePreference() {
     if (storedData) {
       const parsedData = JSON.parse(storedData);
       const now = Date.now();
-      // 检查是否在1小时内
-      const isWithinHour = now - parsedData.timestamp < 60 * 60 * 1000;
-      console.log('Auto lang detection: Stored language:', parsedData.language, 'Timestamp:', parsedData.timestamp, 'Is within hour:', isWithinHour);
-      if (isWithinHour) {
+      // 检查是否在12小时内
+      const isWithin12Hours = now - parsedData.timestamp < 12 * 60 * 60 * 1000;
+      console.log('Auto lang detection: Stored language:', parsedData.language, 'Timestamp:', parsedData.timestamp, 'Is within 12 hours:', isWithin12Hours);
+      if (isWithin12Hours) {
         return parsedData.language;
       } else {
-        // 如果超过1小时，清除存储
+        // 如果超过12小时，清除存储
         localStorage.removeItem('language_preference');
         console.log('Auto lang detection: Removed expired language preference');
       }
@@ -68,54 +68,28 @@ function redirectToLanguage() {
   const storedLanguage = getUserLanguagePreference();
   console.log('Auto lang detection: Stored language preference:', storedLanguage);
   
+  // 如果有存储的语言选择，使用存储的语言
   if (storedLanguage) {
-    // 如果存储的语言与当前语言不同，进行重定向
+    console.log('Auto lang detection: Using stored language preference:', storedLanguage);
+    // 如果存储的语言与当前语言不同，说明用户手动切换了语言
     if (storedLanguage !== detectedLang) {
-      console.log('Auto lang detection: Stored language different from current, redirecting...');
-      // 构建新的 URL
-      let newPathname;
-      if (storedLanguage === 'en') {
-        // 英文版本移除语言前缀
-        if (pathname.startsWith('/zh')) {
-          newPathname = pathname.replace(/^\/zh/, '');
-          // 确保路径以 / 开头
-          if (!newPathname.startsWith('/')) {
-            newPathname = `/${newPathname}`;
-          }
-          // 如果路径是空的，设置为 /
-          if (newPathname === '') {
-            newPathname = '/';
-          }
-        } else {
-          newPathname = pathname;
-        }
-      } else {
-        // 中文版本添加 /zh 前缀
-        if (pathname.startsWith('/zh')) {
-          newPathname = pathname;
-        } else {
-          if (pathname === '/') {
-            newPathname = '/zh';
-          } else {
-            newPathname = `/zh${pathname}`;
-          }
-        }
+      console.log('Auto lang detection: Stored language different from URL, user manually switched. Updating storage...');
+      // 更新本地存储为当前 URL 的语言（用户手动切换的）
+      try {
+        const storageData = {
+          language: detectedLang,
+          timestamp: Date.now()
+        };
+        console.log('Auto lang detection: Updating language preference to match URL:', storageData);
+        localStorage.setItem('language_preference', JSON.stringify(storageData));
+      } catch (error) {
+        console.error('Error updating language preference to localStorage:', error);
       }
-      
-      // 确保新路径不是重复的
-      if (newPathname !== window.location.pathname) {
-        const newUrl = new URL(newPathname, window.location.origin);
-        newUrl.search = window.location.search;
-        newUrl.hash = window.location.hash;
-        console.log('Auto lang detection: Redirecting to:', newUrl.href);
-        
-        // 重定向
-        window.location.href = newUrl.href;
-      }
+      // 不需要重定向，因为 URL 已经是用户想要的语言
     } else {
       console.log('Auto lang detection: Stored language matches current, no redirect needed');
     }
-    return;
+    return; // 重要：有存储时直接返回，不再执行下面的地区检测
   }
   
   // 没有存储的语言选择，根据地区检测
@@ -171,13 +145,13 @@ function redirectToLanguage() {
     console.log('Auto lang detection: Target language matches current, no redirect needed');
   }
   
-  // 更新本地存储，无论是否有语言前缀
+  // 保存语言选择（首次访问）
   try {
     const storageData = {
       language: targetLanguage,
       timestamp: Date.now()
     };
-    console.log('Auto lang detection: Storing language preference:', storageData);
+    console.log('Auto lang detection: Storing initial language preference:', storageData);
     localStorage.setItem('language_preference', JSON.stringify(storageData));
   } catch (error) {
     console.error('Error storing language preference to localStorage:', error);
