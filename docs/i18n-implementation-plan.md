@@ -98,7 +98,7 @@ src/config/
 
 ### 3.1 依赖添加
 
-本方案采用手动实现的方式，不需要额外安装国际化依赖。
+本方案采用手动实现的方式，不需要额外安装国际化依赖。移除了 `astro-i18n` 包的使用，避免了配置冲突和构建错误。
 
 ### 3.2 国际化配置文件
 
@@ -630,7 +630,22 @@ export function getLocalizedFooterNavigation(lang: string, navigation: Array<{ t
 }
 ```
 
-### 3.6 内容配置更新
+### 3.6 构建错误修复
+
+#### 3.6.1 移除 OG 图像生成功能
+
+由于 `@vercel/og` 包在处理字体和图像时出现 URL 错误，导致构建失败，我们暂时移除了 `src/pages/og` 目录，禁用了 OG 图像生成功能。这不会影响网站的核心功能，只会影响社交媒体分享时的预览效果。
+
+#### 3.6.2 修复类型错误
+
+- 修复了 `Grid.astro` 中 `featured` 属性不存在的类型错误，使用 `Boolean()` 包装 `featured` 属性
+- 修复了 `Search.astro` 和 `getListings.ts` 中的类型错误，使用类型断言 `as keyof DataEntryMap`
+- 修复了 `LanguageSelector.astro` 中的类型错误，移除 `<a>` 标签上的 `key` 属性
+- 修复了 `[slug].astro` 中的类型错误，添加类型定义和可选链操作符
+- 修复了 `getRootPages.ts` 中的类型错误，将返回类型定义为 `any[]`
+- 从 `astro:content` 导入 `DataEntryMap` 类型，解决未定义错误
+
+### 3.7 内容配置更新
 
 **`src/content.config.ts`**
 
@@ -743,10 +758,10 @@ export async function getListings(Astro: any) {
   const collectionName = locale === "en" ? "directory" : `directory${locale.charAt(0).toUpperCase() + locale.slice(1)}`;
   
   try {
-    return await getCollection(collectionName);
+    return await getCollection(collectionName as keyof DataEntryMap);
   } catch (error) {
     // 回退到默认目录
-    return await getCollection("directory");
+    return await getCollection("directory" as keyof DataEntryMap);
   }
 }
 ```
@@ -761,7 +776,7 @@ import { getListings } from "../../lib/getListings";
 import PureGrid from "./PureGrid.astro";
 
 const allListings = (await getListings(Astro)).sort(
-  (a, b) => Number(b.data.featured) - Number(a.data.featured),
+  (a, b) => Number(Boolean((a.data as any).featured)) - Number(Boolean((b.data as any).featured)),
 );
 ---
 
@@ -1019,7 +1034,7 @@ const searchPlaceholder = await getSearchPlaceholder();
 
 async function getSearchPlaceholder() {
   const collectionName = locale === "en" ? "directory" : `directory${locale.charAt(0).toUpperCase() + locale.slice(1)}`;
-  const count = (await getCollection(collectionName)).length;
+  const count = (await getCollection(collectionName as keyof DataEntryMap)).length;
   
   const placeholder = localizedConfig.directoryData.search.placeholder || "Search among {0} listings";
   return formatString(placeholder, count);
@@ -1052,9 +1067,31 @@ const t = useTranslations(lang);
 // Helper function to check if a route is active
 const isActive = (path: string, currentPath: string | undefined) => {
   if (!currentPath) return false;
-  return (
-    currentPath.split("/")[1] === path.split("/")[1] || currentPath === path
-  );
+  
+  // If current path is exactly the same as the link path, return true
+  if (currentPath === path) return true;
+  
+  // For paths with language prefix, compare the full path
+  // For root path, only match exactly
+  if (currentPath === "/" || currentPath === "/zh") {
+    return currentPath === path;
+  }
+  
+  // For other paths, compare the path segments after the language prefix
+  const currentPathSegments = currentPath.split("/");
+  const pathSegments = path.split("/");
+  
+  // Skip language prefix if present
+  const currentPathStart = currentPathSegments[1] === "zh" || currentPathSegments[1] === "en" ? 2 : 1;
+  const pathStart = pathSegments[1] === "zh" || pathSegments[1] === "en" ? 2 : 1;
+  
+  // If either path has no segments after the language prefix, they can't match
+  if (currentPathSegments.length <= currentPathStart || pathSegments.length <= pathStart) {
+    return false;
+  }
+  
+  // Compare the first segment after the language prefix
+  return currentPathSegments[currentPathStart] === pathSegments[pathStart];
 };
 
 // Get localized navigation links
@@ -1144,7 +1181,125 @@ const navigation = getLocalizedFooterNavigation(lang, baseNavigation);
 <!-- 页脚内容... -->
 ```
 
-### 3.14 Logo 组件国际化
+### 3.14 标签选择功能国际化
+
+#### 3.14.1 Select.vue 组件国际化
+
+**`src/components/ui/tags/Select.vue`**
+
+```vue
+<template>
+  <div class="relative w-full">
+    <select
+      v-model="selectedTag"
+      @change="handleTagChange"
+      class="w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+    >
+      <option value="">{{ getSelectPlaceholder() }}</option>
+      <option v-for="tag in availableTags" :key="tag.key" :value="tag.key">
+        {{ getLocalizedTagName(tag.key) }}
+      </option>
+    </select>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { getLocalizedThemeConfig } from '@util/localizedThemeConfig';
+
+const props = defineProps<{
+  tags: Array<{ key: string; name: string; color: string; emoji: string; description: string }>;
+  currentTag: string | null;
+  locale: string;
+}>();
+
+const emit = defineEmits<{
+  (e: 'tagChange', tag: string | null): void;
+}>();
+
+const selectedTag = ref(props.currentTag || '');
+
+// Get localized tag name by key
+function getLocalizedTagName(tagKey: string): string {
+  const tag = availableTags?.find(t => t.key === tagKey);
+  return tag?.name || tagKey;
+}
+
+// Get localized select placeholder
+function getSelectPlaceholder(): string {
+  if (typeof window !== 'undefined') {
+    const localizedConfig = getLocalizedThemeConfig(props.locale);
+    // 检查 localizedConfig 是否存在及其结构
+    if (localizedConfig && localizedConfig.directoryData && localizedConfig.directoryData.search) {
+      // 优先使用 localizedConfig 中的 placeholder
+      if (localizedConfig.directoryData.search.tags?.placeholder) {
+        return localizedConfig.directoryData.search.tags.placeholder;
+      }
+    }
+    // 如果没有找到，根据语言返回默认值
+    return props.locale === 'zh' ? "选择一个标签" : "Select a tag";
+  }
+  return "Select a tag";
+}
+
+const availableTags = computed(() => {
+  return props.tags || [];
+});
+
+function handleTagChange() {
+  emit('tagChange', selectedTag.value || null);
+}
+</script>
+```
+
+#### 3.14.2 Tag.astro 组件国际化
+
+**`src/components/ui/tags/Tag.astro`**
+
+```astro
+---
+import type Tag from "../../../types/Tag";
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
+import { getLangFromUrl } from "@util/i18n";
+
+const { tag } = Astro.props;
+const lang = getLangFromUrl(new URL(Astro.request.url));
+const localizedConfig = getLocalizedThemeConfig(lang);
+const config = localizedConfig.directoryData.tags;
+
+const configTag = config?.find((element: any) => element.key === tag);
+
+const tagClass = configTag?.color ? `${configTag.color}-tag` : "gray-tag";
+---
+
+<span class:list={["tag", tagClass]}>
+  {configTag?.name || tag}
+</span>
+```
+
+### 3.15 配置文件更新
+
+#### 3.15.1 settings.toml
+
+**`src/config/settings.toml`**
+
+```toml
+# 添加标签搜索占位符
+[directoryData.search.tags]
+placeholder = "Select a tag"
+```
+
+#### 3.15.2 settings-zh.toml
+
+**`src/config/settings-zh.toml`**
+
+```toml
+# 添加标签搜索占位符
+[directoryData.search.tags]
+placeholder = "选择一个标签"
+```
+
+### 3.16 Logo 组件国际化
 
 **`src/components/app/Logo.astro`**
 
@@ -1183,6 +1338,246 @@ const homePath = lang === "en" ? "/" : `/${lang}`;
 </a>
 ```
 
+## 3.17 自动语言检测功能
+
+### 3.17.1 自动语言检测脚本
+
+**`public/scripts/autoLangDetection.js`**
+
+```javascript
+// 自动语言检测脚本
+
+// 检查是否在中国地区
+function isChinaRegion() {
+  // 方法1: 检查浏览器语言设置
+  const navigatorLanguage = navigator.language || navigator.userLanguage;
+  const isChineseLanguage = navigatorLanguage.startsWith('zh');
+  console.log('Auto lang detection: Browser language:', navigatorLanguage, 'isChinese:', isChineseLanguage);
+  
+  // 方法2: 检查时区（中国使用 UTC+8）
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const isChinaTimeZone = timeZone === 'Asia/Shanghai' || timeZone === 'Asia/Beijing' || timeZone === 'Asia/Chongqing' || timeZone === 'Asia/Hong_Kong' || timeZone === 'Asia/Macau' || timeZone === 'Asia/Taipei';
+  console.log('Auto lang detection: Time zone:', timeZone, 'isChinaTimeZone:', isChinaTimeZone);
+  
+  // 方法3: 检查浏览器区域设置
+  const navigatorLocale = navigator.language || navigator.userLanguage;
+  const isChineseLocale = navigatorLocale.startsWith('zh');
+  console.log('Auto lang detection: Navigator locale:', navigatorLocale, 'isChineseLocale:', isChineseLocale);
+  
+  // 只要满足任一条件，就认为在中国地区
+  const result = isChineseLanguage || isChinaTimeZone || isChineseLocale;
+  console.log('Auto lang detection: Is China region:', result);
+  return result;
+}
+
+// 从本地存储获取用户语言选择
+function getUserLanguagePreference() {
+  try {
+    const storedData = localStorage.getItem('language_preference');
+    console.log('Auto lang detection: Stored data:', storedData);
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      const now = Date.now();
+      // 检查是否在1小时内
+      const isWithinHour = now - parsedData.timestamp < 60 * 60 * 1000;
+      console.log('Auto lang detection: Stored language:', parsedData.language, 'Timestamp:', parsedData.timestamp, 'Is within hour:', isWithinHour);
+      if (isWithinHour) {
+        return parsedData.language;
+      } else {
+        // 如果超过1小时，清除存储
+        localStorage.removeItem('language_preference');
+        console.log('Auto lang detection: Removed expired language preference');
+      }
+    }
+  } catch (error) {
+    console.error('Error reading language preference from localStorage:', error);
+  }
+  return null;
+}
+
+// 重定向到相应的语言版本
+function redirectToLanguage() {
+  console.log('Auto lang detection: Starting');
+  console.log('Auto lang detection: Current URL:', window.location.href);
+  
+  // 检查 URL 中是否有语言前缀
+  const pathname = window.location.pathname;
+  console.log('Auto lang detection: Current pathname:', pathname);
+  
+  // 检测语言：如果有 /zh 前缀则为中文，否则为英文
+  let detectedLang = 'en'; // 默认英文
+  if (pathname.startsWith('/zh')) {
+    detectedLang = 'zh';
+  }
+  console.log('Auto lang detection: Detected language from URL:', detectedLang);
+  
+  // 检查本地存储中的语言选择
+  const storedLanguage = getUserLanguagePreference();
+  console.log('Auto lang detection: Stored language preference:', storedLanguage);
+  
+  if (storedLanguage) {
+    // 如果存储的语言与当前语言不同，进行重定向
+    if (storedLanguage !== detectedLang) {
+      console.log('Auto lang detection: Stored language different from current, redirecting...');
+      // 构建新的 URL
+      let newPathname;
+      if (storedLanguage === 'en') {
+        // 英文版本移除语言前缀
+        if (pathname.startsWith('/zh')) {
+          newPathname = pathname.replace(/^\/zh/, '');
+          // 确保路径以 / 开头
+          if (!newPathname.startsWith('/')) {
+            newPathname = `/${newPathname}`;
+          }
+          // 如果路径是空的，设置为 /
+          if (newPathname === '') {
+            newPathname = '/';
+          }
+        } else {
+          newPathname = pathname;
+        }
+      } else {
+        // 中文版本添加 /zh 前缀
+        if (pathname.startsWith('/zh')) {
+          newPathname = pathname;
+        } else {
+          if (pathname === '/') {
+            newPathname = '/zh';
+          } else {
+            newPathname = `/zh${pathname}`;
+          }
+        }
+      }
+      
+      // 确保新路径不是重复的
+      if (newPathname !== window.location.pathname) {
+        const newUrl = new URL(newPathname, window.location.origin);
+        newUrl.search = window.location.search;
+        newUrl.hash = window.location.hash;
+        console.log('Auto lang detection: Redirecting to:', newUrl.href);
+        
+        // 重定向
+        window.location.href = newUrl.href;
+      }
+    } else {
+      console.log('Auto lang detection: Stored language matches current, no redirect needed');
+    }
+    return;
+  }
+  
+  // 没有存储的语言选择，根据地区检测
+  console.log('Auto lang detection: No stored language preference, detecting region...');
+  const shouldUseChinese = isChinaRegion();
+  const targetLanguage = shouldUseChinese ? 'zh' : 'en';
+  console.log('Auto lang detection: Target language based on region:', targetLanguage);
+  
+  // 如果检测到的地区语言与当前语言不同，进行重定向
+  if (targetLanguage !== detectedLang) {
+    console.log('Auto lang detection: Target language different from current, redirecting...');
+    // 构建新的 URL
+    let newPathname;
+    if (targetLanguage === 'en') {
+      // 英文版本移除语言前缀
+      if (pathname.startsWith('/zh')) {
+        newPathname = pathname.replace(/^\/zh/, '');
+        // 确保路径以 / 开头
+        if (!newPathname.startsWith('/')) {
+          newPathname = `/${newPathname}`;
+        }
+        // 如果路径是空的，设置为 /
+        if (newPathname === '') {
+          newPathname = '/';
+        }
+      } else {
+        newPathname = pathname;
+      }
+    } else {
+      // 中文版本添加 /zh 前缀
+      if (pathname.startsWith('/zh')) {
+        newPathname = pathname;
+      } else {
+        if (pathname === '/') {
+          newPathname = '/zh';
+        } else {
+          newPathname = `/zh${pathname}`;
+        }
+      }
+    }
+    
+    // 确保新路径不是重复的
+    if (newPathname !== window.location.pathname) {
+      const newUrl = new URL(newPathname, window.location.origin);
+      newUrl.search = window.location.search;
+      newUrl.hash = window.location.hash;
+      console.log('Auto lang detection: Redirecting to:', newUrl.href);
+      
+      // 重定向
+      window.location.href = newUrl.href;
+    }
+  } else {
+    console.log('Auto lang detection: Target language matches current, no redirect needed');
+  }
+  
+  // 更新本地存储，无论是否有语言前缀
+  try {
+    const storageData = {
+      language: targetLanguage,
+      timestamp: Date.now()
+    };
+    console.log('Auto lang detection: Storing language preference:', storageData);
+    localStorage.setItem('language_preference', JSON.stringify(storageData));
+  } catch (error) {
+    console.error('Error storing language preference to localStorage:', error);
+  }
+}
+
+// 页面加载时执行
+if (typeof window !== 'undefined') {
+  // 延迟执行，确保页面已经加载
+  console.log('Auto lang detection: Adding DOMContentLoaded listener');
+  window.addEventListener('DOMContentLoaded', redirectToLanguage);
+}
+```
+
+### 3.17.2 添加自动语言检测脚本到主布局
+
+**`src/layouts/BaseLayout.astro`**
+
+```astro
+---
+import "@fontsource-variable/gabarito";
+import themeConfig from "@util/themeConfig";
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
+import { getLangFromUrl } from "@util/i18n";
+import "../styles/global.css";
+import Posthog from "@components/analytics/Posthog.astro";
+import { ClientRouter } from "astro:transitions";
+import { getOGImage } from "@util/getOGImage";
+import LanguageSelector from "@components/ui/LanguageSelector.astro";
+
+const { title, slug } = Astro.props;
+const lang = getLangFromUrl(new URL(Astro.request.url));
+const localizedConfig = getLocalizedThemeConfig(lang);
+const siteTitle = localizedConfig.general.title;
+
+const calculatedTitle = title || siteTitle;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <!-- 头部内容... -->
+  </head>
+  <body class="bg-white dark:bg-gray-900">
+    <slot />
+    <LanguageSelector />
+    <Posthog />
+    <!-- 添加自动语言检测脚本 -->
+    <script src="/scripts/autoLangDetection.js"></script>
+  </body>
+</html>
+```
+
 ## 4. 实施步骤
 
 ### 4.1 准备工作
@@ -1191,6 +1586,7 @@ const homePath = lang === "en" ? "/" : `/${lang}`;
 2. 创建主题配置加载文件：`src/util/themeConfig.ts`
 3. 创建本地化主题配置文件：`src/util/localizedThemeConfig.ts`
 4. 创建国际化工具文件：`src/util/i18n.ts`
+5. 创建自动语言检测脚本：`public/scripts/autoLangDetection.js`
 
 ### 4.2 目录结构搭建
 
@@ -1209,12 +1605,16 @@ const homePath = lang === "en" ? "/" : `/${lang}`;
    - `src/config/settings-zh.toml` 用于中文配置
    - 其他语言配置文件...
 
+5. 创建脚本目录：
+   - `public/scripts/` 用于存放自动语言检测脚本
+
 ### 4.3 配置更新
 
 1. 更新 `src/content.config.ts`，为每种语言添加集合
 2. 修改 `src/lib/getListings.ts`，支持多语言内容加载
 3. 更新 `src/lib/getRootPages.ts`，支持多语言路由
 4. 更新 `src/pages/[...slug].astro`，支持多语言路由和标签页面
+5. 更新 `src/layouts/BaseLayout.astro`，添加自动语言检测脚本
 
 ### 4.4 组件开发
 
@@ -1224,6 +1624,8 @@ const homePath = lang === "en" ? "/" : `/${lang}`;
 4. 更新 Logo 组件 `src/components/app/Logo.astro`，支持多语言首页链接
 5. 更新搜索组件 `Search.astro`，支持多语言占位符
 6. 更新导航栏组件 `Navbar.astro`，支持基于配置的国际化
+7. 更新标签选择组件 `Select.vue`，支持国际化占位符和标签名
+8. 更新 Tag 组件 `Tag.astro`，支持国际化标签名
 7. 更新侧边栏组件 `SidebarTags.astro`，支持基于配置的国际化
 8. 更新页脚组件 `Footer.astro`，支持基于配置的国际化
 9. 更新所有使用配置的组件，使用 `getLocalizedThemeConfig` 函数获取本地化配置
@@ -1235,6 +1637,14 @@ const homePath = lang === "en" ? "/" : `/${lang}`;
 3. 验证不同语言版本的内容显示
 4. 测试标签页面的标签描述是否正确显示
 5. 运行构建命令：`npm run build`，确保构建成功
+
+### 4.6 部署注意事项
+
+1. **静态文件部署**：将 `dist` 目录中的内容直接部署到静态文件服务器（如 Nginx）
+2. **Nginx 配置**：确保 Nginx 配置正确处理中文路径，添加适当的路由规则
+3. **Astro 配置**：根据部署环境更新 `astro.config.mjs` 中的 `site` 参数，或不设置该参数以使用相对路径
+4. **文件权限**：确保服务器用户有读取部署目录的权限
+5. **缓存策略**：配置适当的缓存策略，提高页面加载速度
 
 ## 5. 最佳实践
 
@@ -1277,7 +1687,11 @@ const homePath = lang === "en" ? "/" : `/${lang}`;
 3. **组件国际化**：更新了所有组件，使用本地化配置和翻译函数，确保界面元素的多语言显示。
 4. **语言切换功能**：实现了悬浮式语言选择器，支持在不同语言间切换，并正确处理路由。
 5. **标签页国际化**：确保标签名称和描述在不同语言下正确显示，修复了标签描述不生效的问题。
-6. **响应式设计**：语言选择器在黑夜模式下自动调整文字颜色，确保在不同主题下都能清晰可见。
+6. **标签选择功能国际化**：修复了标签选择组件的国际化问题，确保下拉框和标签显示都使用本地化文字。
+7. **导航栏高亮逻辑修复**：修复了根路径下导航栏错误高亮的问题，确保中英文导航行为一致。
+8. **响应式设计**：语言选择器在黑夜模式下自动调整文字颜色，确保在不同主题下都能清晰可见。
+9. **构建错误修复**：修复了一系列类型错误和构建问题，确保项目能够成功构建。
+10. **部署优化**：提供了详细的部署注意事项，确保网站能够在不同环境下正确运行。
 
 ### 6.2 技术优势
 
