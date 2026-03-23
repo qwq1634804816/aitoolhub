@@ -4,7 +4,10 @@ theme = 'peppermint'
 
 [general]
 title = "Meditation Apps"
+# Logo 图片路径（可选）：如果提供图片路径，将显示图片 logo
 logo = ""
+# Logo 图标（可选）：如果没有设置 logo 图片，将显示图标。留空字符串 "" 则不显示任何图标，只显示文字标题
+# 图标来自 https://icon-sets.iconify.design/ （例如：tabler:robot）
 iconLogo = "tabler:coffee"
 
 [general.seo]

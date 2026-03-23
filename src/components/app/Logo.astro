@@ -18,12 +18,12 @@ const homePath = lang === "en" ? "/" : `/${lang}`;
         class="h-8"
         alt={localizedConfig?.general.title + " Logo"}
       />
-    ) : (
+    ) : localizedConfig.general.iconLogo ? (
       <Icon
         class="w-7 h-7 text-gray-600 dark:text-white"
         name={localizedConfig?.general?.iconLogo}
       />
-    )
+    ) : null
   }
   <span
     class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
