@@ -31,10 +31,6 @@ const baseNavigation = [
       .slice(0, 4),
   },
   {
-    title: "Blog",
-    links: [{ title: "Articles", link: "/blog" }],
-  },
-  {
     title: "Legal",
     links: [
       { title: "Privacy Policy", link: "/legal/terms-of-service" },
@@ -75,45 +71,25 @@ const navigation = getLocalizedFooterNavigation(lang, baseNavigation);
           }
         </div>
       </div>
-      <div class="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
+      <div class="mt-16 grid grid-cols-3 gap-8 xl:col-span-2 xl:mt-0 xl:justify-items-end">
         {
-          [...Array(2).keys()].map((count) => (
-            <div class="md:grid md:grid-cols-2 md:gap-8">
-              <div>
-                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">
-                  {navigation[count].title}
-                </h3>
-                <ul role="list" class="mt-6 space-y-4">
-                  {navigation[count].links.map((item) => (
-                    <li>
-                      <a
-                        href={item.link}
-                        class="text-sm leading-6 text-gray-600 dark:text-gray-300 hover:dark:text-gray-400 hover:text-gray-900"
-                      >
-                        {item.title}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div class="mt-10 md:mt-0">
-                <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">
-                  {navigation[count + 2].title}
-                </h3>
-                <ul role="list" class="mt-6 space-y-4">
-                  {navigation[count + 2].links.map((item) => (
-                    <li>
-                      <a
-                        href={item.link}
-                        class="text-sm leading-6 text-gray-600 dark:text-gray-300 hover:dark:text-gray-400 hover:text-gray-900"
-                      >
-                        {item.title}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          navigation.map((section) => (
+            <div>
+              <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">
+                {section.title}
+              </h3>
+              <ul role="list" class="mt-6 space-y-4">
+                {section.links.map((item) => (
+                  <li>
+                    <a
+                      href={item.link}
+                      class="text-sm leading-6 text-gray-600 dark:text-gray-300 hover:dark:text-gray-400 hover:text-gray-900"
+                    >
+                      {item.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))
         }

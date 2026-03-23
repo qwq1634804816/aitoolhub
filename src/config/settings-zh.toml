@@ -129,10 +129,7 @@ href = "https://tally.so"
 # ========================
 
 [footer]
-description = "一站式发现全球优质AI工具。"
+description = "一站式发现全球优质 AI 工具。"
 
-[footer.socials.x]
-link = "https://x.com"
-
-[footer.socials.youtube]
-link = "https://youtube.com"
+[footer.socials.telegram]
+link = "https://t.me/yourchannel"

@@ -42,6 +42,7 @@ labelForCard = "Featured ✨"
 [ui.icons]
 dark = "tabler:moon"
 light = "tabler:sun"
+telegram = "tabler:brand-telegram"
 youtube = "tabler:brand-youtube"
 x = "tabler:brand-twitter"
 instagram = "tabler:brand-instagram"

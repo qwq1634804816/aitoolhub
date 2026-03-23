@@ -131,8 +131,5 @@ href = "https://tally.so"
 [footer]
 description = "Discover and explore the best AI tools in one place."
 
-[footer.socials.x]
-link = "https://x.com"
-
-[footer.socials.youtube]
-link = "https://youtube.com"
+[footer.socials.telegram]
+link = "https://t.me/yourchannel"
