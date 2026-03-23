@@ -36,7 +36,14 @@ if (defaultData) {
     ...defaultData,
   };
 } else {
-  defaultSettings = settingsSchema.parse(defaultConfigData);
+  // Fallback: merge theme config with defaultConfigData directly
+  const selectedTheme = defaultConfigData.theme || "peppermint";
+  const themeConfig = themes[selectedTheme as keyof typeof themes];
+  
+  defaultSettings = {
+    ...themeConfig,
+    ...defaultConfigData,
+  } as SettingsSchema;
 }
 
 // Load Chinese config
@@ -51,7 +58,14 @@ if (zhData) {
     ...zhData,
   };
 } else {
-  zhSettings = settingsSchema.parse(zhConfigData);
+  // Fallback: merge theme config with zhConfigData directly
+  const selectedTheme = zhConfigData.theme || defaultConfigData.theme || "peppermint";
+  const themeConfig = themes[selectedTheme as keyof typeof themes];
+  
+  zhSettings = {
+    ...themeConfig,
+    ...zhConfigData,
+  } as SettingsSchema;
 }
 
 // Export default settings

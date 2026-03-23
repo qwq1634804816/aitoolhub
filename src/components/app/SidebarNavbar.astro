@@ -4,11 +4,13 @@ import ColorSelector from "./header/ColorSelector.astro";
 import Logo from "./Logo.astro";
 import LanguageSelector from "../ui/LanguageSelector.astro";
 import config from "@util/themeConfig";
+import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
 import { getLangFromUrl, useTranslations, getLocalizedNavigation } from "@util/i18n";
 
 // Get the current path safely
 const currentPath = new URL(Astro.request.url).pathname;
 const lang = getLangFromUrl(new URL(Astro.request.url));
+const localizedConfig = getLocalizedThemeConfig(lang);
 const t = useTranslations(lang);
 
 // Helper function to check if a route is active
@@ -18,7 +20,7 @@ const isActive = (path: string, currentPath: string | undefined) => {
 };
 
 // Get localized navigation links
-const localizedLinks = getLocalizedNavigation(lang, config.header.navbar.links || []);
+const localizedLinks = getLocalizedNavigation(lang, localizedConfig.header.navbar.links || []);
 ---
 
 <nav
@@ -57,12 +59,12 @@ const localizedLinks = getLocalizedNavigation(lang, config.header.navbar.links |
     <div
       class="flex gap-3 items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse"
     >
-    { config.header.actionButton.href &&
+    { localizedConfig.header.actionButton.href &&
       <a
-        href={config.header.actionButton.href}
+        href={localizedConfig.header.actionButton.href}
         class="hidden md:inline-flex items-center dark:text-gray-300 text-gray-600"
       >
-        {t(`navigation.${config.header.actionButton.text}`)}
+        {localizedConfig.header.actionButton.text}
       </a>
       }
       <ColorSelector transition:persist class="hidden md:flex" />

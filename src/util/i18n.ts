@@ -75,8 +75,8 @@ export function getDirectoryCollection(lang: string) {
 
 // Get localized navigation links
 export function getLocalizedNavigation(lang: string, links: Array<{ name: string; href: string; target?: string }>) {
+  // Return links as-is, the name is already localized from the config file
   return links.map(link => {
-    const localizedName = i18nConfig[lang]?.navigation?.[link.name] || link.name;
     // Add language prefix to internal links
     let localizedHref = link.href;
     if (!localizedHref.startsWith("http")) {
@@ -84,7 +84,6 @@ export function getLocalizedNavigation(lang: string, links: Array<{ name: string
     }
     return {
       ...link,
-      name: localizedName,
       href: localizedHref
     };
   });
