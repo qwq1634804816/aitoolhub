@@ -1,94 +1,135 @@
-# available directory themes:
-# spearmint, peppermint, hemingway, brookmint
 theme = 'brookmint'
 
 [general]
-title = "Meditation Apps"
+title = "🚀 AI TOOL HUB - Discover the Best AI Tools"
 logo = ""
-iconLogo = "tabler:coffee"
+iconLogo = "tabler:robot"
 
 [general.seo]
-name = "Cafe Directory"
-description = "Find the best nuxt starter kits."
-url = "https://nuxtstarters.com"
+name = "AI TOOL HUB"
+description = "Discover the best AI tools for productivity, coding, design, content creation, and more. Updated daily."
+url = "https://aitoolhub.com"
 
 [directoryData.source]
-name = "default"    # default, mock, sheets, json
+name = "default"
 links = "normal"
 
 [directoryData.tagPages]
-title = "{0} Apps"
+title = "{0} AI Tools"
 
 [directoryData.search]
-placeholder = "Search among {0} listings of this directory :)"
+placeholder = "Search among {0} AI tools..."
 
 [directoryData.search.tags]
-display = "show-all" # options: none,select,show-all
+display = "show-all"
 intersection = false
-placeholder = "Select a tag"
+placeholder = "Filter by category"
+
+# ========================
+# AI TOOL TAGS (10 main categories)
+# ========================
 
 [[directoryData.tags]]
-key = "breathing"
-name = "Breathing"
+key = "chatbot"
+name = "Chatbots"
 color = "blue"
-emoji = "👃"
-description = "Breathing techniques are a popular feature in meditation apps."
+emoji = "🤖"
+description = "AI chatbots like ChatGPT, Claude, and assistants for daily tasks."
 
 [[directoryData.tags]]
-key = "sleep"
-name = "Sleep"
-color = "green"
-emoji = "💤"
-description = "Some apps include music that slowly goes away to help you sleep better and rest."
-
-[[directoryData.tags]]
-key = "meditation"
-name = "Meditation"
+key = "writing"
+name = "AI Writing"
 color = "purple"
-emoji = "🧘‍♂️"
-description = "A meditation for your life. It's a great way to relax and clear your mind. It's also a great way to improve your sleep."
+emoji = "✍️"
+description = "Tools for copywriting, blogging, SEO content, and automation."
 
 [[directoryData.tags]]
-key = "yoga"
-name = "Yoga"
-color = "purple"
-emoji = "🧘‍♂️"
-description = "A yoga for your life."
+key = "image"
+name = "Image Generation"
+color = "pink"
+emoji = "🎨"
+description = "Generate images using AI like Midjourney, DALL·E, Stable Diffusion."
 
 [[directoryData.tags]]
-key = "timer"
-name = "Timer"
+key = "video"
+name = "Video AI"
+color = "red"
+emoji = "🎬"
+description = "AI video creation, editing, avatars, and automation."
+
+[[directoryData.tags]]
+key = "audio"
+name = "Audio & Voice"
 color = "green"
-emoji = "⏰"
-description = "Timers can be used to track how much you meditate."
+emoji = "🎧"
+description = "Text-to-speech, voice cloning, and AI music tools."
+
+[[directoryData.tags]]
+key = "coding"
+name = "Coding AI"
+color = "indigo"
+emoji = "💻"
+description = "AI coding assistants like Copilot and code generators."
+
+[[directoryData.tags]]
+key = "productivity"
+name = "Productivity"
+color = "yellow"
+emoji = "⚡"
+description = "Automation, workflows, AI agents, and productivity boosters."
+
+[[directoryData.tags]]
+key = "design"
+name = "Design"
+color = "orange"
+emoji = "🧩"
+description = "UI/UX, logo, and design tools powered by AI."
+
+[[directoryData.tags]]
+key = "business"
+name = "Business & Marketing"
+color = "teal"
+emoji = "📈"
+description = "AI tools for marketing, SEO, analytics, and growth."
+
+[[directoryData.tags]]
+key = "education"
+name = "Education"
+color = "cyan"
+emoji = "🎓"
+description = "AI tools for learning, tutoring, and knowledge management."
+
+# ========================
+# HEADER
+# ========================
 
 [header.banner]
-show = true
-text = "Follow mark_bruderer on twitter."
-link = "https://x.com/intent/follow?screen_name=mark_bruderer"
-brandText = "AI Agent Libraries"
+show = false
+text = "🔥 Submit your AI tool & get featured!"
+link = "https://tally.so"
+brandText = "AI TOOL HUB"
 
 [header.navbar]
 colorModeSelector = true
 
 [[header.navbar.links]]
-name = "Blog"
-href = "/blog"
-
-[[header.navbar.links]]
-name = "Analytics"
-href = "https://us.posthog.com/shared/vHlGCcSqPjGH4r_QijaXSETtmN9J-g"
+name = "Follow us"
+href = "https://tally.so"
 target = "_blank"
 
 [header.actionButton]
-text = "Submit an app"
+text = "Submit AI Tool"
 href = "https://tally.so"
 
+# ========================
+# FOOTER
+# ========================
+
 [footer]
-description = "Best directory for my niche."
+description = "Discover and explore the best AI tools in one place."
 
 [footer.socials.x]
-link = "https://x.com/mark_bruderer"
+link = "https://x.com"
 
 [footer.socials.youtube]
-link = "https://www.youtube.com/@mark_hacks"
+link = "https://youtube.com"

@@ -1,94 +1,135 @@
-# available directory themes:
-# spearmint, peppermint, hemingway, brookmint
-theme = ''
+theme = 'brookmint'
 
 [general]
-title = "冥想应用"
+title = "🚀 AI工具导航"
 logo = ""
-iconLogo = "tabler:coffee"
+iconLogo = "tabler:robot"
 
 [general.seo]
-name = "冥想应用目录"
-description = "发现最好的冥想应用。"
-url = "https://nuxtstarters.com"
+name = "AI工具导航"
+description = "收录最全AI工具，涵盖写作、绘图、编程、视频、办公等多个领域，每日更新。"
+url = "https://aitoolhub.com/zh"
 
 [directoryData.source]
-name = "default"    # default, mock, sheets, json
+name = "default"
 links = "normal"
 
 [directoryData.tagPages]
-title = "{0} 应用"
+title = "{0} AI工具"
 
 [directoryData.search]
-placeholder = "在这个目录的 {0} 个应用中搜索 :)"
+placeholder = "在 {0} 个AI工具中搜索..."
 
 [directoryData.search.tags]
-display = "show-all" # options: none,select,show-all
+display = "show-all"
 intersection = false
-placeholder = "选择一个标签"
+placeholder = "选择分类"
+
+# ========================
+# AI分类
+# ========================
 
 [[directoryData.tags]]
-key = "breathing"
-name = "呼吸"
+key = "chatbot"
+name = "AI聊天"
 color = "blue"
-emoji = "👃"
-description = "呼吸技巧是冥想应用中的热门功能，这是从settings-zh.toml文件加载的最新描述！"
+emoji = "🤖"
+description = "如 ChatGPT、Claude 等智能助手"
 
 [[directoryData.tags]]
-key = "sleep"
-name = "睡眠"
-color = "green"
-emoji = "💤"
-description = "一些应用包含慢慢消失的音乐，帮助您更好地入睡和休息。"
-
-[[directoryData.tags]]
-key = "meditation"
-name = "冥想"
+key = "writing"
+name = "AI写作"
 color = "purple"
-emoji = "🧘‍♂️"
-description = "为您的生活提供冥想。这是放松和清醒头脑的好方法。也是改善睡眠的好方法。"
+emoji = "✍️"
+description = "文章生成、SEO写作、文案创作"
 
 [[directoryData.tags]]
-key = "yoga"
-name = "瑜伽"
-color = "purple"
-emoji = "🧘‍♂️"
-description = "为您的生活提供瑜伽。"
+key = "image"
+name = "AI绘图"
+color = "pink"
+emoji = "🎨"
+description = "Midjourney、DALL·E 等图像生成工具"
 
 [[directoryData.tags]]
-key = "timer"
-name = "计时器"
+key = "video"
+name = "AI视频"
+color = "red"
+emoji = "🎬"
+description = "视频生成、数字人、剪辑工具"
+
+[[directoryData.tags]]
+key = "audio"
+name = "AI语音"
 color = "green"
-emoji = "⏰"
-description = "计时器可用于跟踪您的冥想时间。"
+emoji = "🎧"
+description = "语音合成、声音克隆、AI音乐"
+
+[[directoryData.tags]]
+key = "coding"
+name = "AI编程"
+color = "indigo"
+emoji = "💻"
+description = "Copilot、代码生成与辅助开发"
+
+[[directoryData.tags]]
+key = "productivity"
+name = "效率工具"
+color = "yellow"
+emoji = "⚡"
+description = "自动化、AI Agent、办公效率"
+
+[[directoryData.tags]]
+key = "design"
+name = "AI设计"
+color = "orange"
+emoji = "🧩"
+description = "UI设计、Logo生成等"
+
+[[directoryData.tags]]
+key = "business"
+name = "营销增长"
+color = "teal"
+emoji = "📈"
+description = "SEO、营销、数据分析工具"
+
+[[directoryData.tags]]
+key = "education"
+name = "AI学习"
+color = "cyan"
+emoji = "🎓"
+description = "学习辅助、AI导师、知识管理"
+
+# ========================
+# 头部
+# ========================
 
 [header.banner]
-show = true
-text = "在Twitter上关注mark_bruderer。"
-link = "https://x.com/intent/follow?screen_name=mark_bruderer"
-brandText = "AI 代理库"
+show = false
+text = "🔥 提交你的AI工具，获取曝光！"
+link = "https://tally.so"
+brandText = "AI工具导航"
 
 [header.navbar]
 colorModeSelector = true
 
 [[header.navbar.links]]
-name = "Blog"
-href = "/blog"
-
-[[header.navbar.links]]
-name = "Analytics"
-href = "https://us.posthog.com/shared/vHlGCcSqPjGH4r_QijaXSETtmN9J-g"
+name = "关注我们"
+href = "https://tally.so"
 target = "_blank"
 
 [header.actionButton]
-text = "提交应用"
+text = "提交AI工具"
 href = "https://tally.so"
 
+# ========================
+# 底部
+# ========================
+
 [footer]
-description = "我的利基市场的最佳目录。"
+description = "一站式发现全球优质AI工具。"
 
 [footer.socials.x]
-link = "https://x.com/mark_bruderer"
+link = "https://x.com"
 
 [footer.socials.youtube]
-link = "https://www.youtube.com/@mark_hacks"
+link = "https://youtube.com"
