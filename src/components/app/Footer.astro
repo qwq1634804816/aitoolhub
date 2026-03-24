@@ -3,13 +3,12 @@ import AppLogo from "./Logo.astro";
 import { Icon } from "astro-icon/components";
 import config from "@util/themeConfig";
 import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
-import { getLangFromUrl, useTranslations, getLocalizedFooterNavigation } from "@util/i18n";
+import { getLangFromUrl, getLocalizedFooterNavigation } from "@util/i18n";
 
 const lang = getLangFromUrl(new URL(Astro.request.url));
 const localizedConfig = getLocalizedThemeConfig(lang);
 const socials = Object.values(localizedConfig.footer.socials);
 const socialNames = Object.keys(localizedConfig.footer.socials);
-const t = useTranslations(lang);
 
 // Get base navigation
 const baseNavigation = [

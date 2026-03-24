@@ -1,4 +1,4 @@
-import { settingsSchema, themeSchema, themeSettingsSchema, type SettingsSchema } from "@validation/settings";
+import { themeSchema, themeSettingsSchema, type SettingsSchema } from "@validation/settings";
 import defaultConfigData from "../config/settings.toml";
 import peppermint from "../config/themes/peppermint.toml";
 import spearmint from "../config/themes/spearmint.toml";

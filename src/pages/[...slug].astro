@@ -9,8 +9,7 @@ import { getRootPages } from "@lib/getRootPages";
 import config from "@util/themeConfig";
 import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
 import DirectoryCard from "@components/directory/cards/index.astro";
-import { useTranslations } from "@util/i18n";
-import type { CollectionEntry } from "astro:content";
+import { getLangFromUrl, useTranslations } from "@util/i18n";
 
 // Fetch all listings and pages
 const { slug } = Astro.params;

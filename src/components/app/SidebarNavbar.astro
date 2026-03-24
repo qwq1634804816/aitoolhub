@@ -2,16 +2,13 @@
 import { Icon } from "astro-icon/components";
 import ColorSelector from "./header/ColorSelector.astro";
 import Logo from "./Logo.astro";
-import LanguageSelector from "../ui/LanguageSelector.astro";
-import config from "@util/themeConfig";
 import { getLocalizedThemeConfig } from "@util/localizedThemeConfig";
-import { getLangFromUrl, useTranslations, getLocalizedNavigation } from "@util/i18n";
+import { getLangFromUrl, getLocalizedNavigation } from "@util/i18n";
 
 // Get the current path safely
 const currentPath = new URL(Astro.request.url).pathname;
 const lang = getLangFromUrl(new URL(Astro.request.url));
 const localizedConfig = getLocalizedThemeConfig(lang);
-const t = useTranslations(lang);
 
 // Helper function to check if a route is active
 const isActive = (path: string, currentPath: string | undefined) => {
