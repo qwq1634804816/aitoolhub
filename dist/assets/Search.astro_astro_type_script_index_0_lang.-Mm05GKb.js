@@ -1,0 +1,1 @@
+import{s as r}from"./store.Dl7GMZrM.js";const t=document.getElementById("search");t?.addEventListener("input",e=>{const n=e.target;r.set(n.value)});const s=function(e){e.key==="k"&&(e.ctrlKey||e.metaKey)&&(e.preventDefault(),t?.focus()),e.key==="Escape"&&(e.preventDefault(),t?.blur())};document.body.addEventListener("keydown",s);
