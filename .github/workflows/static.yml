@@ -1,3 +1,4 @@
+# Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
 on:
@@ -10,10 +11,6 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
   build_and_deploy:
     environment:
@@ -25,24 +22,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --- 第一步：设置 Node.js 环境 ---
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          registry-url: "https://registry.npmjs.org"
-          cache: "pnpm"  # 指定使用 pnpm 作为包管理器
+          node-version: '20'  # 推荐指定版本，或者用 lts/*
+          cache: 'pnpm'       # 告诉它缓存 pnpm 依赖
 
+      # --- 第二步：关键！安装 pnpm ---
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      # --- 第三步：安装项目依赖 ---
       - name: Install dependencies
         run: pnpm install
 
+      # --- 第四步：构建项目 ---
       - name: Build
-        run: pnpm run build  # 确保你的 package.json 中有 build 脚本
+        run: pnpm run build  # 或者你的构建命令，如 pnpm build
 
+      # --- 第五步：上传产物 ---
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./dist"  # 指定构建输出目录
+          path: './dist'  # 确保这里是你的输出目录，如果是根目录用 '.'
 
+      # --- 第六步：部署 ---
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
