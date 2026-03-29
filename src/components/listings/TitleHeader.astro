@@ -3,12 +3,26 @@ import { Icon } from "astro-icon/components";
 import Image from "astro/components/Image.astro";
 
 const { title, link, linkText, description, image } = Astro.props;
+
+const isRemoteImage = (url: any) => typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'));
 ---
 
 <div class="mb-10">
   <div class="flex justify-between items-end">
     <div>
-      {image && <Image class="h-15 w-15 mb-8" src={image} alt={title} />}
+      {image && (
+        isRemoteImage(image) ? (
+          <img
+            class="h-15 w-15 mb-8"
+            src={image}
+            alt={title}
+            width="60"
+            height="60"
+          />
+        ) : (
+          <Image class="h-15 w-15 mb-8" src={image} alt={title} />
+        )
+      )}
       <h1 class="font-bold text-4xl text-gray-900 dark:text-gray-50">
         {title}
       </h1>

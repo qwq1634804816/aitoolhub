@@ -2,6 +2,8 @@
 import { Image } from "astro:assets";
 import DirectoryFeaturedTag from "../FeaturedTag.astro";
 const { myItem, href } = Astro.props;
+
+const isRemoteImage = (url: any) => typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'));
 ---
 
 <a
@@ -12,12 +14,23 @@ const { myItem, href } = Astro.props;
   <div class="flex-none mr-3 rounded-none w-16 h-16 overflow-hidden">
     {
       myItem.image ? (
-        <Image
-          class="w-16 h-16 object-cover"
-          src={myItem.image}
-          alt={myItem.title}
-          loading="lazy"
-        />
+        isRemoteImage(myItem.image) ? (
+          <img
+            class="w-16 h-16 object-cover"
+            src={myItem.image}
+            alt={myItem.title}
+            loading="lazy"
+            width="64"
+            height="64"
+          />
+        ) : (
+          <Image
+            class="w-16 h-16 object-cover"
+            src={myItem.image}
+            alt={myItem.title}
+            loading="lazy"
+          />
+        )
       ) : (
         <div class="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg" />
       )

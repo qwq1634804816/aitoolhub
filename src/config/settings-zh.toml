@@ -11,7 +11,7 @@ iconLogo = ""
 [general.seo]
 name = "AI工具导航"
 description = "收录最全AI工具，涵盖写作、绘图、编程、视频、办公等多个领域，每日更新。"
-url = "https://aitoolhub.com/zh"
+url = "https://aitool.alisencent.com/zh"
 
 [directoryData.source]
 name = "default"
@@ -27,10 +27,6 @@ placeholder = "在 {0} 个AI工具中搜索..."
 display = "show-all"
 intersection = false
 placeholder = "选择分类"
-
-# ========================
-# AI分类
-# ========================
 
 [[directoryData.tags]]
 key = "chatbot"
@@ -102,14 +98,10 @@ color = "cyan"
 emoji = "🎓"
 description = "学习辅助、AI导师、知识管理"
 
-# ========================
-# 头部
-# ========================
-
 [header.banner]
 show = false
 text = "🔥 提交你的AI工具，获取曝光！"
-link = "https://tally.so"
+link = "https://aitool.alisencent.com"
 brandText = "AI工具导航"
 
 [header.navbar]
@@ -117,16 +109,12 @@ colorModeSelector = true
 
 [[header.navbar.links]]
 name = "关注我们"
-href = "https://tally.so"
+href = "https://aitool.alisencent.com"
 target = "_blank"
 
 [header.actionButton]
 text = "提交AI工具"
-href = "https://tally.so"
-
-# ========================
-# 底部
-# ========================
+href = "https://aitool.alisencent.com"
 
 [footer]
 description = "一站式发现全球优质 AI 工具。"

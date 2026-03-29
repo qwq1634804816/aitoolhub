@@ -3,16 +3,40 @@ import UiTag from "@components/ui/tags/Tag.astro";
 import DirectoryFeaturedTag from "../FeaturedTag.astro";
 import { Image } from "astro:assets";
 const { myItem, href } = Astro.props;
+
+const isRemoteImage = (url: any) => typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'));
 ---
 
 <a href={href}
   class="block h-full border border-gray-200 dark:border-gray-500 hover:border-gray-400 hover:border-solid dark:hover:border-gray-300 rounded relative group transition-all duration-300">
   { myItem.featured ? <DirectoryFeaturedTag class="ml-6"  /> : <></> }
-  { myItem.image ? <Image height={500} width={800} class="w-full h-48 rounded-t object-cover"
-    src={myItem.image} alt={myItem.title} /> :  <div
-    class="w-full h-48 px-2 text-center flex justify-center items-center rounded-t font-bold text-2xl bg-gray-200 dark:bg-gray-600">
-    {myItem.title }
-  </div> }
+  {
+    myItem.image ? (
+      isRemoteImage(myItem.image) ? (
+        <img
+          class="w-full h-48 rounded-t object-cover"
+          src={myItem.image}
+          alt={myItem.title}
+          width="800"
+          height="500"
+        />
+      ) : (
+        <Image
+          height={500}
+          width={800}
+          class="w-full h-48 rounded-t object-cover"
+          src={myItem.image}
+          alt={myItem.title}
+        />
+      )
+    ) : (
+      <div
+        class="w-full h-48 px-2 text-center flex justify-center items-center rounded-t font-bold text-2xl bg-gray-200 dark:bg-gray-600"
+      >
+        {myItem.title}
+      </div>
+    )
+  }
   <div class="p-6">
     <h3 class="m-0 text-lg font-semibold dark:text-gray-50 card-title">
       { myItem?.title }
