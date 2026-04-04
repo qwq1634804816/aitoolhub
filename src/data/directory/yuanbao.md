@@ -4,8 +4,6 @@ description: It is a C-end AI assistant app based on the self-research hybrid me
 image: ../images/yuanbao.png
 tags:
   - chatbot
-  - writing
-  - image
 link: https://yuanbao.tencent.com/
 ---
 
