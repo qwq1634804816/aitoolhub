@@ -1,7 +1,7 @@
 ---
 title: Yuanbao/yuanqi
 description: It is a C-end AI assistant app based on the self-research hybrid meta model launched by Tencent. It not only provides core functions such as AI search, AI summarization, and AI writing in work scenarios, but also parses multiple WeChat public number links, URLs, and documents in multiple formats. Yuanbao also supports the creation of personal intelligences, provides speaking accompaniment and other special AI applications, which are powerful and easy to use.
-image: ../images/yuanbao.png
+image: ../../images/yuanbao.png
 tags:
   - chatbot
 link: https://yuanbao.tencent.com/

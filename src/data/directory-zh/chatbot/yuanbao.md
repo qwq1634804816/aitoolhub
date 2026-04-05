@@ -1,7 +1,7 @@
 ---
 title: 元宝/元器
 description: 腾讯推出的一款基于自研混元大模型的C端AI助手App。它不仅能在工作场景中提供AI搜索、AI总结、AI写作等核心功能，还能解析多个微信公众号链接、网址，以及多种格式的文档。元宝还支持创建个人智能体，提供口语陪练等特色AI应用，功能强大且易于使用。
-image: ../images/yuanbao.png
+image: ../../images/yuanbao.png
 tags:
   - chatbot
 link: https://yuanbao.tencent.com/
